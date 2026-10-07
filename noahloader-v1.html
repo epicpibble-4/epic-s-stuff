@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Glzmoz Loader</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #0a0a0a; color: #c27c15; font-family: monospace; text-align: center; }
+        .loading { margin-top: 50px; }
+        .error { color: #ff4444; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="loading">Hold up im loading mf...</div>
+    
+    <script>
+        fetch('https://raw.githubusercontent.com/epicpibble-4/epic-s-stuff/refs/heads/main/noah.html')
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => {
+                document.querySelector('.loading').innerHTML = 
+                    '<div class="error">Failed to load ur either on school wifi or ur school doesnt allow htmls </3 (which means ur fucked)';
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>
