@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blob HTML Editor with Live Preview</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+        p {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .workspace {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            min-height: 0;
+        }
+        .pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .pane-header {
+            background: #eee;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: none;
+            resize: none;
+            background-color: #fff;
+            box-sizing: border-box;
+            outline: none;
+        }
+        iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background-color: #fff;
+        }
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004999;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Blob HTML Editor with Live Preview</h2>
+    <p>Type your HTML code on the left to see it render instantly on the right using a Blob URL.</p>
+
+    <div class="workspace">
+        <!-- Editor Pane -->
+        <div class="pane">
+            <div class="pane-header">
+                <span>HTML Code</span>
+            </div>
+            <textarea id="codeEditor"><!DOCTYPE html>
+<html>
+<head>
+    <title>Blob Test Page</title>
+    <style>
+        body { background: #e0f7fa; text-align: center; padding-top: 40px; font-family: sans-serif; }
+        h1 { color: #00796b; }
+        p { color: #004d40; }
+    </style>
+</head>
+<body>
+    <h1>Hello Blob World!</h1>
+    <p>This is rendering live via a Blob URL.</p>
+</body>
+</html></textarea>
+        </div>
+
+        <!-- Preview Pane -->
+        <div class="pane">
+            <div class="pane-header">
+                <span>Live Preview</span>
+                <button id="popoutBtn">Open in New Tab</button>
+            </div>
+            <iframe id="previewFrame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('codeEditor');
+        const previewFrame = document.getElementById('previewFrame');
+        const popoutBtn = document.getElementById('popoutBtn');
+        
+        let currentBlobUrl = null;
+
+        function updatePreview() {
+            const code = editor.value;
+
+            // Revoke the previous blob URL to prevent memory leaks
+            if (currentBlobUrl) {
+                URL.revokeObjectURL(currentBlobUrl);
+            }
+
+            // Create a new Blob and object URL
+            const blob = new Blob([code], { type: 'text/html' });
+            currentBlobUrl = URL.createObjectURL(blob);
+
+            // Update the iframe source
+            previewFrame.src = currentBlobUrl;
+        }
+
+        // Update preview whenever the user types
+        editor.addEventListener('input', updatePreview);
+
+        // Open the current blob URL in a new browser tab when button is clicked
+        popoutBtn.addEventListener('click', () => {
+            if (currentBlobUrl) {
+                window.open(currentBlobUrl, '_blank');
+            }
+        });
+
+        // Initial load preview
+        updatePreview();
+    </script>
+
+</body>
+</html>
