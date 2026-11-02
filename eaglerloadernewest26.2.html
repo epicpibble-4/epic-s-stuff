@@ -6,17 +6,78 @@
 <head>
     <meta charset="UTF-8">
     <title>CIever l Log in With CIever</title>
-    <!-- Replace the URL below with the absolute path to your securely hosted HTTPS favicon image -->
     <link id="custom-favicon" rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/epicpibble-4/epic-s-stuff/image_assets/cleve.png" />
 </head>
 <body>
 
-    <div class="loading"><style>body{background-color:black !important; text-align: center;} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.spin-img{animation:spin 3s linear infinite}</style><h1 style="font-family: 'Arial', monospace; color: blue;"> Loading pibbleclientv2.2...</h1> <img src="https://cdn.jsdelivr.net/gh/epicpibble-4/epic-s-stuff/image_assets/pibble.png" alt="pibbe" width="50" class="spin-img"> <h3 style="font-family: 'Comic Sans MS', Comic Sans; color: white;">will take about 10 secs</h3><p style=" color: #b0b0b0">made by epicpibble-4 on gh *also subscribe to channel</p></div>
+    <div class="loading">
+        <style>
+            body{background-color:black !important; text-align: center;} 
+            @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+            .spin-img{animation:spin 3s linear infinite}
+        </style>
+        <h1 style="font-family: 'Arial', monospace; color: blue;"> Loading pibbleclientv2.2...</h1> 
+        <img src="https://cdn.jsdelivr.net/gh/epicpibble-4/epic-s-stuff/image_assets/pibble.png" alt="pibbe" width="50" class="spin-img"> 
+        <h3 style="font-family: 'Comic Sans MS', Comic Sans; color: white;">will take about 10 secs</h3>
+        <p style=" color: #b0b0b0">made by epicpibble-4 on gh *also subscribe to channel</p>
+    </div>
     
     <script>
-        // Define the title and favicon URL you want to enforce permanently
         const enforcedTitle = "Resources";
-        const enforcedFavicon = "https://cdn.jsdelivr.net/gh/epicpibble-4/epic-s-stuff/image_assets/cleve.png"; // Change this to your icon URL
+        const enforcedFavicon = "https://cdn.jsdelivr.net/gh/epicpibble-4/epic-s-stuff/image_assets/cleve.png";
+
+        // This is the new, upgraded protection script template
+        const protectionScript = `
+            <script>
+                (function() {
+                    document.title = "${enforcedTitle}";
+                    const targetFavicon = "${enforcedFavicon}";
+                    
+                    // Intercept any future changes to link.href properties directly
+                    const originalHrefDescriptor = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href');
+                    Object.defineProperty(HTMLLinkElement.prototype, 'href', {
+                        get: function() {
+                            if (this.rel && this.rel.includes('icon')) {
+                                return targetFavicon;
+                            }
+                            return originalHrefDescriptor.get.call(this);
+                        },
+                        set: function(val) {
+                            if (this.rel && this.rel.includes('icon')) {
+                                originalHrefDescriptor.set.call(this, targetFavicon);
+                            } else {
+                                originalHrefDescriptor.set.call(this, val);
+                            }
+                        },
+                        configurable: true,
+                        enumerable: true
+                    });
+
+                    function enforceFavicon() {
+                        let icons = document.querySelectorAll("link[rel*='icon']");
+                        icons.forEach(icon => icon.remove());
+                        
+                        let link = document.createElement('link');
+                        link.rel = 'icon';
+                        link.href = targetFavicon;
+                        document.head.appendChild(link);
+                    }
+                    
+                    enforceFavicon();
+
+                    const observer = new MutationObserver(() => {
+                        if (document.title !== "${enforcedTitle}") {
+                            document.title = "${enforcedTitle}";
+                        }
+                        if (!document.querySelector("link[rel*='icon']")) {
+                            enforceFavicon();
+                        }
+                    });
+                    
+                    observer.observe(document.head, { subtree: true, childList: true, attributes: true });
+                })();
+            <\/script>
+        `;
 
         fetch('https://raw.githubusercontent.com/epicpibble-4/eaglercraft26.2-thebest/refs/heads/main/index.html')
             .then(response => {
@@ -24,43 +85,7 @@
                 return response.text();
             })
             .then(html => {
-                // This script will be injected to run *inside* the newly written document
-                // It locks the title and favicon against any modifications from the incoming page
-                const protectionScript = `
-                    <script>
-                        (function() {
-                            document.title = "${enforcedTitle}";
-                            
-                            function enforceFavicon() {
-                                let link = document.querySelector("link[rel*='icon']");
-                                if (!link) {
-                                    link = document.createElement('link');
-                                    link.rel = 'icon';
-                                    document.head.appendChild(link);
-                                }
-                                link.href = "${enforcedFavicon}";
-                            }
-                            enforceFavicon();
-
-                            // Watch for the page trying to change the title or favicon later
-                            const observer = new MutationObserver(() => {
-                                if (document.title !== "${enforcedTitle}") {
-                                    document.title = "${enforcedTitle}";
-                                }
-                                let link = document.querySelector("link[rel*='icon']");
-                                if (link && link.getAttribute('href') !== "${enforcedFavicon}") {
-                                    link.setAttribute('href', "${enforcedFavicon}");
-                                }
-                            });
-                            
-                            observer.observe(document.head, { subtree: true, childList: true, attributes: true });
-                        })();
-                    <\/script>
-                `;
-
-                // Insert the protection script right after the opening <head> tag of the fetched content
                 let modifiedHtml = html.replace('<head>', '<head>' + protectionScript);
-
                 document.open();
                 document.write(modifiedHtml);
                 document.close();
